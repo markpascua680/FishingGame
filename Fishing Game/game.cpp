@@ -10,15 +10,66 @@ Game::~Game() {
 
 void Game::setup() {
 	gameRunning = true;
+	numFish = 6;	// Number of fish in ocean
 
-	//_window.addImage("boat", &boat, "assets/boat.png");
-	window.addImage("fish1", &fish, "assets/fish1.png");
+	window.addImage("boat", &boat, "assets/boat.png");
+
+	// Populate fish array
+	Direction d;
+	SDL_Rect rect = { 0, 0, 50, 50 };
+	for (int i = 0; i < numFish; i++) { // Generate fishes
+		if (getRandNum(1, 2) == 1) {	// Determine fish starting direction and location
+			d = RIGHT;
+			rect.x = 0;
+
+		}
+		else {
+			d = LEFT;
+			rect.x = ocean.w - 50;
+		}
+			rect.y = getRandNum(ocean.y + 50, ocean.y + ocean.h - 50);
+
+			std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
+			std::string path = "assets/fish" + num + ".png";
+
+			Fish f = { rect, d, path };
+
+			fish.push_back(f);
+	}	
+}
+
+int Game::getRandNum(const int& x, const int& y) {
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<> dist(x, y);
+
+	return dist(rng);
 }
 
 void Game::displayBackground() {
 	window.displayRect(&sky, skyBlue);
 	window.displayRect(&ocean, blue);
 	window.render(NULL, &boat, "assets/boat.png");
+}
+
+void Game::displayFish() {
+	for (Fish& x : fish) {
+		if (x.rect.x > 0 && x.dir == LEFT) {
+			x.rect.x -= 10;
+			window.renderFlip(NULL, &x.rect, x.imagePath, NULL, NULL, SDL_FLIP_HORIZONTAL);
+		}
+		else {
+			x.dir = RIGHT;
+		}
+
+		if (x.rect.x < window.WINDOW_WIDTH && x.dir == RIGHT) {
+			x.rect.x += 10;
+			window.render(NULL, &x.rect, x.imagePath);
+		}
+		else {
+			x.dir = LEFT;
+		}
+	}
 }
 
 void Game::handleEvents() {
@@ -42,20 +93,7 @@ void Game::run() {
 		window.clear();
 
 		displayBackground();
-
-		if (fish.x < window.WINDOW_WIDTH && dir == RIGHT) {
-			fish.x += 5;
-			window.render(NULL, &fish, "assets/fish1.png");
-		}
-		else
-			dir = LEFT;
-
-		if (fish.x > 0 && dir == LEFT) {
-			fish.x -= 5;
-			window.renderFlip(NULL, &fish, "assets/fish1.png", NULL, NULL, SDL_FLIP_HORIZONTAL);
-		}
-		else
-			dir = RIGHT;
+		displayFish();
 
 		window.update();
 
