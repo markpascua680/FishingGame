@@ -31,7 +31,7 @@ void Game::setup() {
 		std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
 		std::string path = "assets/fish" + num + ".png";
 
-		Fish f = { rect, rect.y, d, path };
+		Fish f = { rect, rect.y, d, false, path };
 
 		fish.push_back(f);
 	}	
@@ -54,7 +54,7 @@ void Game::displayBackground() {
 
 void Game::displayFish() {
 	for (Fish& x : fish) {
-		if (x.rect.x > 0 && x.dir == LEFT) {
+		if (x.rect.x > 0 && x.dir == LEFT && !x.isCaught) {
 			x.rect.x -= 7;
 			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.renderFlip(NULL, &x.rect, x.imagePath, NULL, NULL, SDL_FLIP_HORIZONTAL);
@@ -63,13 +63,30 @@ void Game::displayFish() {
 			x.dir = RIGHT;
 		}
 
-		if (x.rect.x < window.WINDOW_WIDTH - x.rect.w && x.dir == RIGHT) {
+		if (x.rect.x < window.WINDOW_WIDTH - x.rect.w && x.dir == RIGHT && !x.isCaught) {
 			x.rect.x += 7;
 			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.render(NULL, &x.rect, x.imagePath);
 		}
 		else {
 			x.dir = LEFT;
+		}
+
+		if (x.isCaught) {
+			x.rect.x = hook.x - 50;
+			x.rect.y = hook.y + 10;
+			window.render(NULL, &x.rect, x.imagePath);
+		}
+
+		if (x.rect.y == window.WINDOW_HEIGHT / 2 + 20) {	// If fish location = hook's starting 
+			for (int i = 0; i < numFish; i++) {
+				if (fish[i].isCaught) {
+					fish[i].isCaught = false;
+					fish.erase(fish.begin() + i);
+					Fish f;
+					fish.insert(fish.begin() + i, f);
+				}
+			}
 		}
 	}
 }
@@ -79,8 +96,7 @@ void Game::handleEvents() {
 	SDL_PollEvent(&e);
 	char keyDown = e.key.keysym.scancode;
 
-	if (isCollision())
-		onCollision();
+	onCollision();
 
 	// Handle input events
 	switch (e.type)
@@ -96,23 +112,20 @@ void Game::handleEvents() {
 	default:
 		if (hook.y > ocean.y + 50 && keyDown == SDL_SCANCODE_SPACE) {
 			hook.y -= 5;
-			std::cout << "wtf" << std::endl;
 		}
 		break;
 	}
 }
 
-bool Game::isCollision() {
-	for (Fish& x : fish) {	// If hook collides with any fish, return true
+void Game::onCollision() {	// Check if hook collides with any fish
+	for (Fish& x : fish) {	
 		if ((std::abs(x.rect.x - hook.x) <= hook.w) && std::abs(x.rect.y - hook.y) <= hook.h) {
-			std::cout << "Collided!" << std::endl;
-			return true;
+			x.isCaught = true;
 		}
 	}
-	return false;
 }
 
-void Game::onCollision() {
+void Game::removeFish() {
 
 }
 

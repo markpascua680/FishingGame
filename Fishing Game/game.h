@@ -21,8 +21,8 @@ public:
 
 	// Event handler
 	void handleEvents();
-	bool isCollision();
 	void onCollision();
+	void removeFish();
 
 	// Starts the game
 	void run();
@@ -55,6 +55,7 @@ private:
 		SDL_Rect rect;
 		int centerLine;	// Centerline that fish oscillates (swims) around
 		Direction dir;
+		bool isCaught;
 		std::string imagePath;
 	};
 
