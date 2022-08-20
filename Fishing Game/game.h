@@ -1,6 +1,7 @@
 #include <vector>
 #include <random>
 #include <string>
+#include <cmath>
 #include <Windows.h>
 #include "interface.h"
 
@@ -29,7 +30,7 @@ public:
 
 	// Game variables
 	bool gameRunning;
-	int numFish;
+	int numFish;	// Number of fish in ocean
 
 	enum Direction {
 		LEFT = 0, RIGHT
@@ -50,6 +51,7 @@ private:
 	
 	struct Fish {
 		SDL_Rect rect;
+		int centerLine;	// Centerline that fish oscillates (swims) around
 		Direction dir;
 		std::string imagePath;
 	};

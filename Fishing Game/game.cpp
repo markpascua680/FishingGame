@@ -16,25 +16,24 @@ void Game::setup() {
 
 	// Populate fish array
 	Direction d;
-	SDL_Rect rect = { 0, 0, 50, 50 };
+	SDL_Rect rect = { 0, 0, 75, 75 };
 	for (int i = 0; i < numFish; i++) { // Generate fishes
 		if (getRandNum(1, 2) == 1) {	// Determine fish starting direction and location
 			d = RIGHT;
-			rect.x = 0;
-
 		}
 		else {
 			d = LEFT;
-			rect.x = ocean.w - 50;
 		}
-			rect.y = getRandNum(ocean.y + 50, ocean.y + ocean.h - 50);
+		
+		rect.x = getRandNum(0, window.WINDOW_WIDTH);
+		rect.y = getRandNum(ocean.y + 200, ocean.y + ocean.h - 50);
 
-			std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
-			std::string path = "assets/fish" + num + ".png";
+		std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
+		std::string path = "assets/fish" + num + ".png";
 
-			Fish f = { rect, d, path };
+		Fish f = { rect, rect.y, d, path };
 
-			fish.push_back(f);
+		fish.push_back(f);
 	}	
 }
 
@@ -55,15 +54,17 @@ void Game::displayBackground() {
 void Game::displayFish() {
 	for (Fish& x : fish) {
 		if (x.rect.x > 0 && x.dir == LEFT) {
-			x.rect.x -= 10;
+			x.rect.x -= 7;
+			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.renderFlip(NULL, &x.rect, x.imagePath, NULL, NULL, SDL_FLIP_HORIZONTAL);
 		}
 		else {
 			x.dir = RIGHT;
 		}
 
-		if (x.rect.x < window.WINDOW_WIDTH && x.dir == RIGHT) {
-			x.rect.x += 10;
+		if (x.rect.x < window.WINDOW_WIDTH - x.rect.w && x.dir == RIGHT) {
+			x.rect.x += 7;
+			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.render(NULL, &x.rect, x.imagePath);
 		}
 		else {
