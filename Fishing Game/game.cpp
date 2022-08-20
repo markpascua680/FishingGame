@@ -5,7 +5,7 @@ Game::Game() {
 }
 
 Game::~Game() {
-
+	SDL_Quit();
 }
 
 void Game::setup() {
@@ -49,6 +49,7 @@ void Game::displayBackground() {
 	window.displayRect(&sky, skyBlue);
 	window.displayRect(&ocean, blue);
 	window.render(NULL, &boat, "assets/boat.png");
+	window.render(NULL, &hook, "assets/hook.png");
 }
 
 void Game::displayFish() {
@@ -76,6 +77,7 @@ void Game::displayFish() {
 void Game::handleEvents() {
 
 	SDL_PollEvent(&e);
+	char keyDown = e.key.keysym.scancode;
 
 	// Handle events
 	switch (e.type)
@@ -83,7 +85,16 @@ void Game::handleEvents() {
 	case SDL_QUIT:
 		gameRunning = false;
 		break;
+	case SDL_KEYDOWN:
+		if (keyDown == SDL_SCANCODE_SPACE) {
+			hook.y += 10;
+		}
+		break;
 	default:
+		if (hook.y > ocean.y + 50 && keyDown == SDL_SCANCODE_SPACE) {
+			hook.y -= 5;
+			std::cout << "wtf" << std::endl;
+		}
 		break;
 	}
 }
@@ -93,11 +104,17 @@ void Game::run() {
 
 		window.clear();
 
+		handleEvents();			// Multiple handle events to reduce input delays
+
 		displayBackground();
+
+		handleEvents();
+
 		displayFish();
+
+		handleEvents();
 
 		window.update();
 
-		handleEvents();
 	}
 }
