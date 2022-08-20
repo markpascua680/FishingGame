@@ -5,6 +5,17 @@
 #include <Windows.h>
 #include "interface.h"
 
+	enum Direction {
+		LEFT = 0, RIGHT
+	};
+
+	struct Fish {
+		SDL_Rect rect;
+		int centerLine;	// Centerline that fish oscillates (swims) around
+		Direction dir;
+		bool isCaught;
+		std::string imagePath;
+	};
 
 class Game
 {
@@ -14,6 +25,7 @@ public:
 
 	// Setup function
 	void setup();
+	Fish generateFish();
 
 	// Draw functions
 	void displayBackground();
@@ -34,10 +46,6 @@ public:
 	bool gameRunning;
 	int numFish;	// Number of fish in ocean
 
-	enum Direction {
-		LEFT = 0, RIGHT
-	};
-
 private:
 	Interface window;
 
@@ -49,17 +57,8 @@ private:
 	SDL_Rect hook = { window.WINDOW_WIDTH / 2 - 35, window.WINDOW_HEIGHT / 2, 35, 50 };
 
 	SDL_Color blue = { 0, 94, 184 };
-	SDL_Color skyBlue = { 0, 181, 226 };
-	
-	struct Fish {
-		SDL_Rect rect;
-		int centerLine;	// Centerline that fish oscillates (swims) around
-		Direction dir;
-		bool isCaught;
-		std::string imagePath;
-	};
+	SDL_Color skyBlue = { 0, 181, 226 };	
 
 	std::vector<Fish> fish;
-
 };
 

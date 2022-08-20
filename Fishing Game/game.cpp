@@ -15,26 +15,34 @@ void Game::setup() {
 	window.addImage("boat", &boat, "assets/boat.png");
 
 	// Populate fish array
-	Direction d;
-	SDL_Rect rect = { 0, 0, 75, 75 };
+	
 	for (int i = 0; i < numFish; i++) { // Generate fishes
-		if (getRandNum(1, 2) == 1) {	// Determine fish starting direction and location
-			d = RIGHT;
-		}
-		else {
-			d = LEFT;
-		}
 		
-		rect.x = getRandNum(0, window.WINDOW_WIDTH);
-		rect.y = getRandNum(ocean.y + 200, ocean.y + ocean.h - 50);
-
-		std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
-		std::string path = "assets/fish" + num + ".png";
-
-		Fish f = { rect, rect.y, d, false, path };
-
+		Fish f = generateFish();
 		fish.push_back(f);
 	}	
+}
+
+Fish Game::generateFish() {
+
+	Direction d;
+	SDL_Rect rect = { 0, 0, 75, 75 };
+
+	if (getRandNum(1, 2) == 1) {	// Determine fish starting direction and location
+		d = RIGHT;
+	}
+	else {
+		d = LEFT;
+	}
+
+	rect.x = getRandNum(0, window.WINDOW_WIDTH);
+	rect.y = getRandNum(ocean.y + 200, ocean.y + ocean.h - 50);
+
+	std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
+	std::string path = "assets/fish" + num + ".png";
+
+	Fish f = { rect, rect.y, d, false, path };
+	return f;
 }
 
 int Game::getRandNum(const int& x, const int& y) {
@@ -83,7 +91,7 @@ void Game::displayFish() {
 				if (fish[i].isCaught) {
 					fish[i].isCaught = false;
 					fish.erase(fish.begin() + i);
-					Fish f;
+					Fish f = generateFish();
 					fish.insert(fish.begin() + i, f);
 				}
 			}
