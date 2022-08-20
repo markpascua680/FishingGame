@@ -21,6 +21,8 @@ public:
 
 	// Event handler
 	void handleEvents();
+	bool isCollision();
+	void onCollision();
 
 	// Starts the game
 	void run();

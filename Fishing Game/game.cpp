@@ -79,7 +79,10 @@ void Game::handleEvents() {
 	SDL_PollEvent(&e);
 	char keyDown = e.key.keysym.scancode;
 
-	// Handle events
+	if (isCollision())
+		onCollision();
+
+	// Handle input events
 	switch (e.type)
 	{
 	case SDL_QUIT:
@@ -99,12 +102,26 @@ void Game::handleEvents() {
 	}
 }
 
+bool Game::isCollision() {
+	for (Fish& x : fish) {	// If hook collides with any fish, return true
+		if ((std::abs(x.rect.x - hook.x) <= hook.w) && std::abs(x.rect.y - hook.y) <= hook.h) {
+			std::cout << "Collided!" << std::endl;
+			return true;
+		}
+	}
+	return false;
+}
+
+void Game::onCollision() {
+
+}
+
 void Game::run() {
 	while (gameRunning) {
 
 		window.clear();
 
-		handleEvents();			// Multiple handle events to reduce input delays
+		handleEvents();			// Multiple event checks to reduce input delays
 
 		displayBackground();
 
