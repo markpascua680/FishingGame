@@ -102,9 +102,11 @@ void Game::displayFish() {
 void Game::handleEvents() {
 
 	SDL_PollEvent(&e);
-	char keyDown = e.key.keysym.scancode;
 
 	onCollision();
+
+	//Handle if a key is being held
+	handleKeyHold();
 
 	// Handle input events
 	switch (e.type)
@@ -112,16 +114,19 @@ void Game::handleEvents() {
 	case SDL_QUIT:
 		gameRunning = false;
 		break;
-	case SDL_KEYDOWN:
-		if (keyDown == SDL_SCANCODE_SPACE) {
-			hook.y += 10;
-		}
-		break;
 	default:
-		if (hook.y > ocean.y + 50 && keyDown == SDL_SCANCODE_SPACE) {
-			hook.y -= 5;
-		}
 		break;
+	}
+}
+
+void Game::handleKeyHold() {
+	const Uint8* keyState = SDL_GetKeyboardState(NULL);
+
+	if (keyState[SDL_SCANCODE_SPACE]) {
+		hook.y += 5;
+	}
+	else if (!keyState[SDL_SCANCODE_SPACE] && hook.y > ocean.y + 50) {
+		hook.y -= 5;
 	}
 }
 

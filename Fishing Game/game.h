@@ -31,8 +31,9 @@ public:
 	void displayBackground();
 	void displayFish();
 
-	// Event handler
+	// Event handlers
 	void handleEvents();
+	void handleKeyHold();
 	void onCollision();
 	void removeFish();
 
