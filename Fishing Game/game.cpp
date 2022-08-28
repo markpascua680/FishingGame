@@ -9,10 +9,14 @@ Game::~Game() {
 }
 
 void Game::setup() {
+	window.setFontSize(36);
+	window.setFont("assets/font/raleway.ttf");
+
 	gameRunning = true;
 	numFish = 6;	// Number of fish in ocean
+	hookDir = DOWN;
 
-	window.addImage("boat", &boat, "assets/boat.png");
+	window.addImage("boat", &boat, "assets/images/boat.png");
 
 	// Populate fish array
 	
@@ -39,7 +43,7 @@ Fish Game::generateFish() {
 	rect.y = getRandNum(ocean.y + 200, ocean.y + ocean.h - 50);
 
 	std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
-	std::string path = "assets/fish" + num + ".png";
+	std::string path = "assets/images/fish" + num + ".png";
 
 	Fish f = { rect, rect.y, d, false, path };
 	return f;
@@ -53,11 +57,16 @@ int Game::getRandNum(const int& x, const int& y) {
 	return dist(rng);
 }
 
+void Game::displayPoints() {
+	window.displayText("Points: " + std::to_string(points), &pointsTxt, white);
+}
+
 void Game::displayBackground() {
 	window.displayRect(&sky, skyBlue);
 	window.displayRect(&ocean, blue);
-	window.render(NULL, &boat, "assets/boat.png");
-	window.render(NULL, &hook, "assets/hook.png");
+	window.render(NULL, &boat, "assets/images/boat.png");
+	window.render(NULL, &hook, "assets/images/hook.png");
+	window.render(NULL, &fisherman, "assets/images/fisherman.png");
 }
 
 void Game::displayFish() {
@@ -86,13 +95,15 @@ void Game::displayFish() {
 			window.render(NULL, &x.rect, x.imagePath);
 		}
 
-		if (x.rect.y == window.WINDOW_HEIGHT / 2 + 20) {	// If fish location = hook's starting 
+		if (x.rect.y == window.WINDOW_HEIGHT / 2 + 20) {	// If fish location = hook's starting, remove fish from hook and add points
 			for (int i = 0; i < numFish; i++) {
 				if (fish[i].isCaught) {
 					fish[i].isCaught = false;
 					fish.erase(fish.begin() + i);
 					Fish f = generateFish();
 					fish.insert(fish.begin() + i, f);
+					points += 10;
+					audio.playSound("assets/sfx/pointEarned.wav");
 				}
 			}
 		}
@@ -101,14 +112,36 @@ void Game::displayFish() {
 
 void Game::handleEvents() {
 
-	SDL_PollEvent(&e);
-
+	// Check if hook collides with any fish
 	onCollision();
 
-	//Handle if a key is being held
+	// Handle if a key is being held
 	handleKeyHold();
 
-	// Handle input events
+	// Handle single key presses
+	handleKeyPress();	
+}
+
+void Game::handleKeyHold() {
+	const Uint8* keyState = SDL_GetKeyboardState(NULL);
+
+	// Hook inputs
+	if (keyState[SDL_SCANCODE_SPACE] && hook.y < window.WINDOW_HEIGHT - 50 && hookDir!= UP) {
+		hook.y += 10;
+		hookDir = DOWN;
+	}
+	else if (hook.y > ocean.y + 50) {
+		hook.y -= 10;
+		hookDir = UP;
+	}
+	else {
+		hookDir = DOWN;
+	}
+}
+
+void Game::handleKeyPress() {
+	SDL_PollEvent(&e);
+
 	switch (e.type)
 	{
 	case SDL_QUIT:
@@ -116,17 +149,6 @@ void Game::handleEvents() {
 		break;
 	default:
 		break;
-	}
-}
-
-void Game::handleKeyHold() {
-	const Uint8* keyState = SDL_GetKeyboardState(NULL);
-
-	if (keyState[SDL_SCANCODE_SPACE]) {
-		hook.y += 5;
-	}
-	else if (!keyState[SDL_SCANCODE_SPACE] && hook.y > ocean.y + 50) {
-		hook.y -= 5;
 	}
 }
 
@@ -138,24 +160,16 @@ void Game::onCollision() {	// Check if hook collides with any fish
 	}
 }
 
-void Game::removeFish() {
-
-}
-
 void Game::run() {
 	while (gameRunning) {
 
 		window.clear();
 
-		handleEvents();			// Multiple event checks to reduce input delays
+		handleEvents();
 
 		displayBackground();
-
-		handleEvents();
-
 		displayFish();
-
-		handleEvents();
+		displayPoints();
 
 		window.update();
 
