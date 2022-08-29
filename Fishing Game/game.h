@@ -38,6 +38,7 @@ public:
 	void handleKeyHold();
 	void handleKeyPress();
 	void onCollision();
+	void gameOverScreen();
 
 	// Starts the game
 	void run();
@@ -49,6 +50,7 @@ public:
 	bool gameRunning;
 	int points;
 	int numFish;	// Number of fish in ocean
+	int sharkCount;	// Keep track of how many sharks currently in ocean
 	Direction hookDir;	// Determines the direction hook is currently going
 
 private:

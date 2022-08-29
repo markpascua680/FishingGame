@@ -14,6 +14,7 @@ void Game::setup() {
 
 	gameRunning = true;
 	numFish = 6;	// Number of fish in ocean
+	sharkCount = 1;
 	hookDir = DOWN;
 
 	window.addImage("boat", &boat, "assets/images/boat.png");
@@ -43,7 +44,20 @@ Fish Game::generateFish() {
 	rect.y = getRandNum(ocean.y + 200, ocean.y + ocean.h - 50);
 
 	std::string num = std::to_string(getRandNum(1, 5));	// Generate filepath of random fish image
-	std::string path = "assets/images/fish" + num + ".png";
+	std::string path;
+
+	int count = 0;
+	for (Fish x : fish) {
+		if (x.imagePath == "assets/images/shark.png")
+			count++;
+	}
+	if (count != sharkCount) {	// Can potentially add more sharks as game progresses
+		rect.w = 200;
+		rect.h = 150;
+		path = "assets/images/shark.png";
+	}
+	else
+		path = "assets/images/fish" + num + ".png";
 
 	Fish f = { rect, rect.y, d, false, path };
 	return f;
@@ -71,7 +85,7 @@ void Game::displayBackground() {
 
 void Game::displayFish() {
 	for (Fish& x : fish) {
-		if (x.rect.x > 0 && x.dir == LEFT && !x.isCaught) {
+		if (x.rect.x > 0 && x.dir == LEFT && !x.isCaught) {		// Display fish swimming left
 			x.rect.x -= 7;
 			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.renderFlip(NULL, &x.rect, x.imagePath, NULL, NULL, SDL_FLIP_HORIZONTAL);
@@ -80,7 +94,7 @@ void Game::displayFish() {
 			x.dir = RIGHT;
 		}
 
-		if (x.rect.x < window.WINDOW_WIDTH - x.rect.w && x.dir == RIGHT && !x.isCaught) {
+		if (x.rect.x < window.WINDOW_WIDTH - x.rect.w && x.dir == RIGHT && !x.isCaught) {	// Display fish swimming right
 			x.rect.x += 7;
 			x.rect.y = 20 * std::sin(0.01 * x.rect.x) + x.centerLine;
 			window.render(NULL, &x.rect, x.imagePath);
@@ -89,7 +103,7 @@ void Game::displayFish() {
 			x.dir = LEFT;
 		}
 
-		if (x.isCaught) {
+		if (x.isCaught) {	// Display fish attached to hook if caught
 			x.rect.x = hook.x - 50;
 			x.rect.y = hook.y + 10;
 			window.render(NULL, &x.rect, x.imagePath);
@@ -98,6 +112,8 @@ void Game::displayFish() {
 		if (x.rect.y == window.WINDOW_HEIGHT / 2 + 20) {	// If fish location = hook's starting, remove fish from hook and add points
 			for (int i = 0; i < numFish; i++) {
 				if (fish[i].isCaught) {
+					if (fish[i].imagePath == "assets/images/shark.png")
+						gameOverScreen();
 					fish[i].isCaught = false;
 					fish.erase(fish.begin() + i);
 					Fish f = generateFish();
@@ -157,6 +173,16 @@ void Game::onCollision() {	// Check if hook collides with any fish
 		if ((std::abs(x.rect.x - hook.x) <= hook.w) && std::abs(x.rect.y - hook.y) <= hook.h) {
 			x.isCaught = true;
 		}
+	}
+}
+
+void Game::gameOverScreen() {
+	SDL_Rect gameOverTxt = { (int)(window.WINDOW_WIDTH / 2.5), window.WINDOW_HEIGHT / 5, 0, 0 };
+
+	while (gameRunning) {
+		handleKeyPress();
+		window.displayText("Game Over!", &gameOverTxt, white);
+		window.update();
 	}
 }
 
