@@ -170,9 +170,11 @@ void Game::handleKeyPress() {
 
 void Game::onCollision() {	// Check if hook collides with any fish
 	for (Fish& x : fish) {	
-		if ((std::abs(x.rect.x - hook.x) <= hook.w) && std::abs(x.rect.y - hook.y) <= hook.h) {
+		if ((hook.x + hook.w / 2 > x.rect.x
+			&& hook.x + hook.w / 2 < x.rect.x + x.rect.w
+			&& hook.y + hook.h / 2 > x.rect.y
+			&& hook.y + hook.h / 2 < x.rect.y + x.rect.h))
 			x.isCaught = true;
-		}
 	}
 }
 
